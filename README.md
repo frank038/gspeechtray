@@ -3,7 +3,7 @@ A speech to text program for Italians. Version 0.1
 
 This program is intended to be used with the Italian language (it's impossible for me to extend this program to other languages).
 
-Made in python3 and Gtk3. A microphone is mandatory. Works only with Xorg, and it is a x86-64 program (only for libvosk.so). Pyinput and sounddevice modules and the vosk engine (v. 0.3.45) are provided. For other architectures, give a look at alphacep/voks-api.
+Made in python3 and Gtk3. A microphone is mandatory. Works only with Xorg, and it is a x86-64 program (only for libvosk.so). Pyinput and sounddevice modules and the vosk engine (v. 0.3.45) are provided. For other CPU architectures, give a look at alphacep/voks-api.
 
 This program is just a tray program; download it from the release section and launch it from the terminal: command line: python3 gspeechtray.py; then, it will ask you to choose a proper microphone from the list; then, exit from the program and relaunch it; now the program is ready to be used. The config file cfg.py doesn't need to be changed manually, unless a custom samplerate is needed.
 
