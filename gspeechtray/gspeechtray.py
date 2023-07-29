@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# V. 0.1
+# V. 0.2
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -23,7 +23,6 @@ from sostituzioni import *
 
 import threading
 
-from pynput import keyboard
 from pynput.keyboard import Controller, Key
 keyboard = Controller()
 
@@ -96,6 +95,10 @@ class cThread(threading.Thread):
             with self.sd.RawInputStream(samplerate=self.samplerate, blocksize = 8000, device=self.ddev,
                 dtype="int16", channels=1, callback=self.callback):
                 rec = KaldiRecognizer(Model(lang="it"), self.samplerate)
+                
+                # first word capitalized
+                word_capitalized = 1
+                
                 while not thread_stop:
                     data = self.q.get()
                     if rec.AcceptWaveform(data):
@@ -114,6 +117,8 @@ class cThread(threading.Thread):
                                 keyboard.release(Key.backspace)
                                 keyboard.type(chart)
                                 keyboard.type(" ")
+                                if chart in segni_di_fine_frase:
+                                    word_capitalized = 1
                                 continue
                             # segni tipo virgolette
                             elif text_to_send in segni_con_pre_spazio:
@@ -144,13 +149,21 @@ class cThread(threading.Thread):
                                 keyboard.press(Key.backspace)
                                 keyboard.release(Key.backspace)
                                 continue
-                            # nuovo rigo
-                            elif text_to_send == "a capo":
-                                keyboard.type("\n")
-                                continue
+                            # # nuovo rigo
+                            # elif text_to_send == "a capo":
+                                # # keyboard.type("\n")
+                                # keyboard.press(Key.backspace)
+                                # keyboard.release(Key.backspace)
+                                # keyboard.press(Key.enter)
+                                # keyboard.release(Key.enter)
+                                # continue
                             #
-                            for chch in text_to_send:
-                                keyboard.type(chch)
+                            if word_capitalized:
+                                text_to_send = text_to_send[0].upper()+text_to_send[1:]
+                                word_capitalized = 0
+                            # for chch in text_to_send:
+                                # keyboard.type(chch)
+                            keyboard.type(text_to_send)
                             keyboard.type(" ")
                         
                         # # else:
