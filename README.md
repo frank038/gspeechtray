@@ -5,7 +5,7 @@ This program is intended to be used with the Italian language (it's impossible f
 
 Made in python3 and Gtk3. A microphone is mandatory. Works only with Xorg, and it is a x86-64 program (only for libvosk.so). Pyinput and sounddevice modules and the vosk engine (v. 0.3.45) are provided. For other CPU architectures, give a look at alphacep/voks-api.
 
-This program is just a tray program; download it from the release section and launch it from the terminal: command line: python3 gspeechtray.py; then, it will ask you to choose a proper microphone from the list; then, exit from the program and relaunch it; now the program is ready to be used. The config file cfg.py doesn't need to be changed manually, unless a custom samplerate is needed.
+This program is just a tray program; download it from the release section and launch it from the terminal: command line (first copy the language model folder to the proper folder, or the language files will be downloaded): python3 gspeechtray.py; then, it will ask you to choose a proper microphone from the list; then, exit from the program and relaunch it; now the program is ready to be used. The config file cfg.py doesn't need to be changed manually, unless a custom samplerate is needed.
 
 The recognized text will be printed into the active and focused window, such as a text editor. First, from the tray choose "Inizia/Ferma il riconoscimento" (the icon will change: red do not write anything, green is for the active state; anyway, the microphone keeps listening everything). 
 
