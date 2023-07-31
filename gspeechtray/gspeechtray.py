@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# V. 0.4
+# V. 0.5
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -104,7 +104,8 @@ class cThread(threading.Thread):
         while True:
             with self.sd.RawInputStream(samplerate=self.samplerate, blocksize = 8000, device=self.ddev,
                 dtype="int16", channels=self.num_ch, callback=self.callback):
-                rec = KaldiRecognizer(Model(lang="it"), self.samplerate)
+                rec = KaldiRecognizer(Model("models/vosk-model-small-it-0.22"), self.samplerate)
+                # rec = KaldiRecognizer(Model(lang="it"), self.samplerate)
                 #
                 # first word capitalized
                 word_capitalized = 1

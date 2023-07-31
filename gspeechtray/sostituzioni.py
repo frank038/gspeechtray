@@ -6,6 +6,7 @@ segni_senza_pre_spazio = {
 "interrogativo" : "?",
 "due punti" : ":",
 "chiudi virgolette" : '"',
+"chiudi parentesi" : ")",
 "per cento" : "%"
 }
 
@@ -15,8 +16,7 @@ segni_di_fine_frase = [
 
 segni_con_pre_spazio = {
 "apri virgolette" : '"',
-"apri parentesi" : "(",
-"chiudi parentesi" : ")"
+"apri parentesi" : "("
 }
 
 segni_con_spazi = {
