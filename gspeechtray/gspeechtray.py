@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# V. 0.5
+# V. 0.6
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -19,13 +19,38 @@ mic_win = 0
 ddata = None
 
 from cfg import *
-from sostituzioni import *
+lang_language = lang
+# from sostituzioni import *
+module_substitutions = "substitutions_{}".format(lang_language)
+import importlib
+
+try:
+    lang_module = importlib.import_module(module_substitutions)
+except:
+    # default language en
+    lang_module = importlib.import_module("substitutions_en")
+
+signs_without_pre_space = lang_module.signs_without_pre_space
+signs_end_of_sentence = lang_module.signs_end_of_sentence
+signes_with_pre_space = lang_module.signes_with_pre_space
+signs_with_spaces = lang_module.signs_with_spaces
+signs_symbols = lang_module.signs_symbols
+signs_without_spaces = lang_module.signs_without_spaces
+DELETE = lang_module.DELETE
+RETURN = lang_module.RETURN
+DELETE=lang_module.DELETE
+RETURN=lang_module.RETURN
+START=lang_module.START
+STOP=lang_module.STOP
+MICROPHONE=lang_module.MICROPHONE
+CHOOSE_MICROPHONE=lang_module.CHOOSE_MICROPHONE
+CLOSE=lang_module.CLOSE
 
 import threading
 
-if len(sys.argv) == 2 and sys.argv[1] == "-P":
-    from pynput.keyboard import Controller, Key
-    keyboard = Controller()
+# if len(sys.argv) == 2 and sys.argv[1] == "-p":
+    # from pynput.keyboard import Controller, Key
+    # keyboard = Controller()
 
 import argparse
 import queue
@@ -82,6 +107,19 @@ is_ready = 1
 if ddev == None:
     is_ready = 0
     
+########################
+
+if len(sys.argv) == 2:
+    if sys.argv[1] == "-p":
+        import writer_module
+        WM = writer_module.WM()
+        # m = mainWindow(1)
+    # elif sys.argv[1] == "-P":
+        # m = mainWindow(0)
+else:
+    import writer_module
+    WM = writer_module.WM()
+    # m = StatusIcon()
 
 ########################
 thread_stop = False
@@ -104,7 +142,8 @@ class cThread(threading.Thread):
         while True:
             with self.sd.RawInputStream(samplerate=self.samplerate, blocksize = 8000, device=self.ddev,
                 dtype="int16", channels=self.num_ch, callback=self.callback):
-                rec = KaldiRecognizer(Model("models/vosk-model-small-it-0.22"), self.samplerate)
+                # rec = KaldiRecognizer(Model("models/vosk-model-small-it-0.22"), self.samplerate)
+                rec = KaldiRecognizer(Model("models/{}".format(lang_language)), self.samplerate)
                 # rec = KaldiRecognizer(Model(lang="it"), self.samplerate)
                 #
                 # first word capitalized
@@ -122,8 +161,8 @@ class cThread(threading.Thread):
                             if text_to_send == "":
                                 continue
                             # segni tipo virgola
-                            elif text_to_send in segni_senza_pre_spazio:
-                                chart = segni_senza_pre_spazio[text_to_send]
+                            elif text_to_send in signs_without_pre_space:
+                                chart = signs_without_pre_space[text_to_send]
                                 if self.w_text_buffer:
                                     iter_start = self.w_text_buffer.get_end_iter()
                                     iter_start.backward_char()
@@ -132,81 +171,76 @@ class cThread(threading.Thread):
                                     sleep(0.2)
                                     self.w_text_buffer.insert(self.w_text_buffer.get_end_iter(), chart+" ")
                                 else:
-                                    keyboard.press(Key.backspace)
-                                    keyboard.release(Key.backspace)
-                                    keyboard.type(chart)
-                                    keyboard.type(" ")
+                                    WM._delete_char()
+                                    WM._write_text(chart)
+                                    WM._write_text(" ")
                                 #
-                                if chart in segni_di_fine_frase:
+                                if chart in signs_end_of_sentence:
                                     word_capitalized = 1
                                 continue
                             # segni che richiedono uno spazio prima ma non dopo
-                            elif text_to_send in segni_con_pre_spazio:
-                                chart = segni_con_pre_spazio[text_to_send]
+                            elif text_to_send in signes_with_pre_space:
+                                chart = signes_with_pre_space[text_to_send]
                                 if self.w_text_buffer:
                                     iter = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, chart)
                                     del iter
                                 else:
-                                    keyboard.type(chart)
+                                    WM._write_text(chart)
                                 continue
                             # con spazio dopo
-                            elif text_to_send in segni_con_spazi:
-                                chart = segni_con_spazi[text_to_send]
+                            elif text_to_send in signs_with_spaces:
+                                chart = signs_with_spaces[text_to_send]
                                 if self.w_text_buffer:
                                     iter = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, chart+" ")
                                     del iter
                                 else:
-                                    keyboard.type(chart)
-                                    keyboard.type(" ")
+                                    WM._write_text(chart)
+                                    WM._write_text(" ")
                                 continue
                             # simboli
-                            elif text_to_send in segni_simboli:
-                                chart = segni_simboli[text_to_send]
+                            elif text_to_send in signs_symbols:
+                                chart = signs_symbols[text_to_send]
                                 if self.w_text_buffer:
                                     iter = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, chart+" ")
                                     del iter
                                 else:
-                                    keyboard.type(chart)
-                                    keyboard.type(" ")
+                                    WM._write_text(chart)
+                                    WM._write_text(" ")
                                 continue
                             # segni senza spazi prima e dopo
-                            elif text_to_send in segni_senza_spazi:
-                                chart = segni_senza_spazi[text_to_send]
+                            elif text_to_send in signs_without_spaces:
+                                chart = signs_without_spaces[text_to_send]
                                 if self.w_text_buffer:
                                     iter_start = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, chart)
                                     del iter_start
                                 else:
-                                    keyboard.press(Key.backspace)
-                                    keyboard.release(Key.backspace)
-                                    keyboard.type(chart)
+                                    WM._delete_char()
+                                    WM._write_text(chart)
                                 continue
                             # cancella l ultimo carattere inserito
-                            elif text_to_send == "cancella":
+                            elif text_to_send == DELETE:
                                 if self.w_text_buffer:
                                     iter_start = self.w_text_buffer.get_end_iter()
                                     iter_start.backward_char()
                                     self.w_text_buffer.delete(iter_start, self.w_text_buffer.get_end_iter())
                                     del iter_start
                                 else:
-                                    keyboard.press(Key.backspace)
-                                    keyboard.release(Key.backspace)
+                                    WM._delete_char()
+                                    
                                 continue
                             # nuovo rigo
-                            elif text_to_send == "a capo":
+                            elif text_to_send == RETURN:
                                 if self.w_text_buffer:
                                     iter = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, "\n")
                                     del iter
                                 # else
-                                    # # keyboard.type("\n")
-                                    # keyboard.press(Key.backspace)
-                                    # keyboard.release(Key.backspace)
-                                    # keyboard.press(Key.enter)
-                                    # keyboard.release(Key.enter)
+                                    # WM._new_line()
+                                    
                                 #
                                 word_capitalized = 1
                                 continue
@@ -220,8 +254,8 @@ class cThread(threading.Thread):
                                 self.w_text_buffer.insert(iter, text_to_send+" ")
                                 del iter
                             else:
-                                keyboard.type(text_to_send)
-                                keyboard.type(" ")
+                                WM._write_text(text_to_send)
+                                WM._write_text(" ")
                         
                         # # else:
                             # # print(rec.PartialResult())
@@ -335,21 +369,21 @@ class mainWindow(Gtk.Window):
             hbox = Gtk.Box(orientation=0, spacing=0)
             self.vbox.pack_start(hbox, False, False, 1)
         #
-        self._startbtn = Gtk.Button(label="Inizia")
+        self._startbtn = Gtk.Button(label=START)
         self._startbtn.connect("clicked", self._btnpause)
         if self.wtype == 0:
             hbox.pack_start(self._startbtn, True, False, 1)
         else:
             self.vbox.pack_start(self._startbtn, False, False, 1)
         #
-        self._micbtn = Gtk.Button(label="Microfono")
+        self._micbtn = Gtk.Button(label=MICROPHONE)
         self._micbtn.connect("clicked", self.set_mic)
         if self.wtype == 0:
             hbox.pack_start(self._micbtn, True, False, 1)
         else:
             self.vbox.pack_start(self._micbtn, False, False, 1)
         #
-        self._closebtn = Gtk.Button(label="Esci")
+        self._closebtn = Gtk.Button(label=CLOSE)
         self._closebtn.connect("clicked", self.t_exit)
         if self.wtype == 0:
             hbox.pack_start(self._closebtn, True, False, 1)
@@ -383,11 +417,10 @@ class mainWindow(Gtk.Window):
     def _btnpause(self, w):
         global ddata
         if ddata:
-            w.set_label("Inizia")
+            w.set_label(START)
             ddata = False
             self._micbtn.set_sensitive(True)
         else:
-            # w.set_label("Ferma")
             ddata = True
             self._micbtn.set_sensitive(False)
             if self.wtype == 0:
@@ -396,7 +429,7 @@ class mainWindow(Gtk.Window):
                 t_start()
             #
             sleep(3)
-            w.set_label("Ferma")
+            w.set_label(STOP)
     
     def t_exit(self, w):
         global thread_stop
@@ -427,7 +460,7 @@ class MicWindow(Gtk.Window):
         self.vbox = Gtk.Box(orientation=1, spacing=10)
         self.add(self.vbox)
         #
-        self.label1 = Gtk.Label(label="      Scegli il microfono      ")
+        self.label1 = Gtk.Label(label="{}".format(CHOOSE_MICROPHONE))
         # 
         self.vbox.pack_start(self.label1, True, True, 1)
         #
@@ -450,7 +483,7 @@ class MicWindow(Gtk.Window):
         #
         self.vbox.pack_start(self.miccombo, True, True, 1)
         #
-        self.button2 = Gtk.Button(label="Chiudi")
+        self.button2 = Gtk.Button(label=CLOSE)
         self.button2.connect("clicked", self.cclose)
         self.button2.props.valign = 2
         self.vbox.pack_start(self.button2, True, True, 1)
@@ -467,7 +500,8 @@ class MicWindow(Gtk.Window):
         with open("cfg.py", "w") as ff:
             ff.write('mic="{}"\n'.format(mic))
             ff.write("msamplerate={}\n".format(msamplerate))
-            ff.write("numch={}".format(numch))
+            ff.write("numch={}\n".format(numch))
+            ff.write('lang="{}"'.format(lang_language))
         #
         global thread_stop
         thread_stop = True
@@ -481,9 +515,12 @@ class MicWindow(Gtk.Window):
 
 if len(sys.argv) == 2:
     if sys.argv[1] == "-p":
+        # import writer_module
         m = mainWindow(1)
     elif sys.argv[1] == "-P":
         m = mainWindow(0)
 else:
+    # import writer_module
     m = StatusIcon()
+
 Gtk.main()
