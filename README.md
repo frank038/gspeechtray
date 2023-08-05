@@ -1,7 +1,7 @@
 # gspeechtray
-A speech to text program for Italians. Version 0.6
+A speech to text program. Version 0.6
 
-This program is intended to be used with the Italian language (it's impossible for me to extend this program to other languages).
+This program is intended to be used with the Italian language, but other languages can be added if a proper substitutions_LANGCODE.py file will be created (in the cfg.py config file the same LANGCODE must be setted, and in the models folder the languages files must be put in a folder named LANGCODE). The English language has been added.
 
 Made in python3 and Gtk3. A microphone is mandatory. Works only with Xorg, and it is a x86-64 program. Pyinput and sounddevice modules and the vosk engine (v. 0.3.45) are provided. The Italian language model is also provided. For other CPU architectures, give a look at alphacep/voks-api.
 
