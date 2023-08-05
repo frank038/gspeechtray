@@ -11,7 +11,7 @@ class WM():
     def _key_press(self, tstring):
         self.keyboard.press(tstring)
     
-    def _key_release(self, tstringf):
+    def _key_release(self, tstring):
         self.keyboard.release(tstring)
     
     def _delete_char(self):
