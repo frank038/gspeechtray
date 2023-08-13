@@ -1,5 +1,5 @@
 # gspeechtray
-A speech to text program. Version 0.6
+A speech to text program. Version 0.6.1
 
 This program is intended to be used with the Italian language, but other languages can be added if a proper substitutions_LANGCODE.py file will be created (in the cfg.py config file the same LANGCODE must be setted, and in the models folder the languages files must be put in a folder named LANGCODE). The English language has been added.
 
