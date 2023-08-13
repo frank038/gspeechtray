@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# V. 0.6
+# V. 0.6.1
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -43,8 +43,9 @@ RETURN=lang_module.RETURN
 START=lang_module.START
 STOP=lang_module.STOP
 MICROPHONE=lang_module.MICROPHONE
-CHOOSE_MICROPHONE=lang_module.CHOOSE_MICROPHONE
 CLOSE=lang_module.CLOSE
+STARTSTOP=lang_module.STARTSTOP
+EXIT=lang_module.EXIT
 
 import threading
 
@@ -160,7 +161,7 @@ class cThread(threading.Thread):
                             #
                             if text_to_send == "":
                                 continue
-                            # segni tipo virgola
+                            # type comma
                             elif text_to_send in signs_without_pre_space:
                                 chart = signs_without_pre_space[text_to_send]
                                 if self.w_text_buffer:
@@ -178,7 +179,7 @@ class cThread(threading.Thread):
                                 if chart in signs_end_of_sentence:
                                     word_capitalized = 1
                                 continue
-                            # segni che richiedono uno spazio prima ma non dopo
+                            # one space before and after
                             elif text_to_send in signes_with_pre_space:
                                 chart = signes_with_pre_space[text_to_send]
                                 if self.w_text_buffer:
@@ -188,7 +189,7 @@ class cThread(threading.Thread):
                                 else:
                                     WM._write_text(chart)
                                 continue
-                            # con spazio dopo
+                            # one space after
                             elif text_to_send in signs_with_spaces:
                                 chart = signs_with_spaces[text_to_send]
                                 if self.w_text_buffer:
@@ -199,7 +200,7 @@ class cThread(threading.Thread):
                                     WM._write_text(chart)
                                     WM._write_text(" ")
                                 continue
-                            # simboli
+                            # symbols
                             elif text_to_send in signs_symbols:
                                 chart = signs_symbols[text_to_send]
                                 if self.w_text_buffer:
@@ -210,7 +211,7 @@ class cThread(threading.Thread):
                                     WM._write_text(chart)
                                     WM._write_text(" ")
                                 continue
-                            # segni senza spazi prima e dopo
+                            # without any spaces before and after
                             elif text_to_send in signs_without_spaces:
                                 chart = signs_without_spaces[text_to_send]
                                 if self.w_text_buffer:
@@ -221,7 +222,7 @@ class cThread(threading.Thread):
                                     WM._delete_char()
                                     WM._write_text(chart)
                                 continue
-                            # cancella l ultimo carattere inserito
+                            # delete the last character
                             elif text_to_send == DELETE:
                                 if self.w_text_buffer:
                                     iter_start = self.w_text_buffer.get_end_iter()
@@ -232,14 +233,14 @@ class cThread(threading.Thread):
                                     WM._delete_char()
                                     
                                 continue
-                            # nuovo rigo
+                            # new line
                             elif text_to_send == RETURN:
                                 if self.w_text_buffer:
                                     iter = self.w_text_buffer.get_end_iter()
                                     self.w_text_buffer.insert(iter, "\n")
                                     del iter
-                                # else
-                                    # WM._new_line()
+                                else:
+                                    WM._new_line()
                                     
                                 #
                                 word_capitalized = 1
@@ -306,17 +307,17 @@ class StatusIcon:
     def on_right_click(self, icon, button, time):
         self.menu = Gtk.Menu()
         menutray = Gtk.MenuItem()
-        menutray.set_label("Inizia/Ferma il riconoscimento")
+        menutray.set_label(label=STARTSTOP)
         menutray.connect("activate", self.set_data)
         self.menu.append(menutray)
         # set the microphone
         mictray = Gtk.MenuItem()
-        mictray.set_label("Scegli il microfono")
+        mictray.set_label(label=MICROPHONE)
         mictray.connect("activate", self.set_mic)
         self.menu.append(mictray)
         #
         eexit = Gtk.MenuItem()
-        eexit.set_label("Esci")
+        eexit.set_label(label=EXIT)
         eexit.connect("activate", self.t_exit)
         self.menu.append(eexit)
         self.menu.show_all()
@@ -460,7 +461,7 @@ class MicWindow(Gtk.Window):
         self.vbox = Gtk.Box(orientation=1, spacing=10)
         self.add(self.vbox)
         #
-        self.label1 = Gtk.Label(label="{}".format(CHOOSE_MICROPHONE))
+        self.label1 = Gtk.Label(label="{}".format(MICROPHONE))
         # 
         self.vbox.pack_start(self.label1, True, True, 1)
         #
@@ -494,6 +495,12 @@ class MicWindow(Gtk.Window):
         mic = self.miccombo.get_active_text()
     
     def wclose(self, w):
+        global thread_stop
+        if mic == "":
+            thread_stop = True
+            self.destroy()
+            Gtk.main_quit()
+        #
         global mic_win
         mic_win = 0
         #
@@ -503,7 +510,6 @@ class MicWindow(Gtk.Window):
             ff.write("numch={}\n".format(numch))
             ff.write('lang="{}"'.format(lang_language))
         #
-        global thread_stop
         thread_stop = True
         #
         self.destroy()
